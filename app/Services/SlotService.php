@@ -6,52 +6,45 @@ use App\Models\Booking;
 
 class SlotService
 {
-    // Maximum allowed reservations per time slot
-    public const MAX_PER_SLOT = 3;
-
-    // Available operating slots
-    public const DAILY_TIMES = [
-        '09:00',
-        '10:30',
-        '13:00',
-        '14:30',
-        '16:00',
-    ];
-
-    /**
-     * Get availability breakdown for a specific date.
-     */
-    public static function getAvailability(string $date): array
+    public static function getCourtAvailability(string $date, string $court): array
     {
-        // Count active bookings (exclude cancelled ones)
-        $bookedCounts = Booking::where('booking_date', $date)
-            ->where('status', '!=', 'cancelled')
-            ->selectRaw('booking_time, count(*) as count')
-            ->groupBy('booking_time')
-            ->pluck('count', 'booking_time')
+        $slotTimes = config('booking.slots', [
+            '09:00', '10:00', '11:00', '14:00', '15:00', '16:00',
+            '17:00', '18:00', '19:00', '20:00', '21:00', '22:00',
+        ]);
+        $maxPerSlot = config('booking.max_per_slot', 1);
+
+        // UPDATED: Use the blocksSlot() scope
+        $bookedTimes = Booking::where('booking_date', $date)
+            ->where('service_name', $court)
+            ->blocksSlot()
+            ->pluck('booking_time')
+            ->map(fn($time) => substr($time, 0, 5))
             ->toArray();
 
         $slots = [];
-        foreach (self::DAILY_TIMES as $time) {
-            // Match H:i or H:i:s
-            $booked = 0;
-            foreach ($bookedCounts as $key => $count) {
-                if (substr($key, 0, 5) === $time) {
-                    $booked = $count;
-                    break;
-                }
-            }
 
-            $remaining = max(0, self::MAX_PER_SLOT - $booked);
+        foreach ($slotTimes as $time) {
+            $isBooked = in_array($time, $bookedTimes);
+            $remaining = $isBooked ? 0 : $maxPerSlot;
 
             $slots[] = [
-                'time' => $time,
-                'booked' => $booked,
+                'time'      => $time,
+                'is_full'   => $isBooked,
                 'remaining' => $remaining,
-                'is_full' => $remaining <= 0,
             ];
         }
 
         return $slots;
+    }
+
+    public static function isSlotFull(string $date, string $time, string $court): bool
+    {
+        // UPDATED: Use the blocksSlot() scope
+        return Booking::where('booking_date', $date)
+            ->where('service_name', $court)
+            ->where('booking_time', 'like', $time . '%')
+            ->blocksSlot()
+            ->exists();
     }
 }

@@ -45,59 +45,58 @@
         <a href="{{ route('admin.bookings.index', ['status' => 'cancelled']) }}" class="{{ $status === 'cancelled' ? 'active' : '' }}">Cancelled</a>
     </div>
 
-    <table>
-        <thead>
+    <table class="table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Player</th>
+            <th>Court</th>
+            <th>Date</th>
+            <th>Start Time</th>
+            <th>End Time</th>
+            <th>Status</th>
+            <th>Price</th>
+        </tr>
+    </thead>
+    <tbody>
+        @forelse($bookings as $booking)
+            @php
+                // Parse the start time and calculate the end time (1 hour later per slot row)
+                $start = \Carbon\Carbon::parse($booking->booking_time);
+                $end = $start->copy()->addMinutes(60);
+            @endphp
             <tr>
-                <th>ID</th>
-                <th>Client</th>
-                <th>Contact</th>
-                <th>Service</th>
-                <th>Schedule</th>
-                <th>Status</th>
-                <th>Actions</th>
+                <td>#{{ $booking->id }}</td>
+                <td>
+                    {{ $booking->name }}<br>
+                    <small>{{ $booking->phone }}</small>
+                </td>
+                <td><strong>{{ $booking->service_name }}</strong></td>
+                <td>{{ \Carbon\Carbon::parse($booking->booking_date)->format('d M Y') }}</td>
+                
+                <!-- Display Start and End Time logically -->
+                <td>{{ $start->format('H:i') }}</td>
+                <td>{{ $end->format('H:i') }}</td>
+                
+                <td>
+                    <span class="badge badge-{{ strtolower($booking->status) }}">
+                        {{ ucfirst($booking->status) }}
+                    </span>
+                </td>
+                <td>
+                    @if($booking->total_amount > 0)
+                        RM {{ $booking->total_amount }}
+                    @else
+                        - <!-- Hide 0.00 for consecutive hours of the same booking -->
+                    @endif
+                </td>
             </tr>
-        </thead>
-        <tbody>
-            @forelse($bookings as $booking)
-                <tr>
-                    <td>{{ $booking->id }}</td>
-                    <td>{{ $booking->name }}</td>
-                    <td>{{ $booking->email }}<br><small>{{ $booking->phone }}</small></td>
-                    <td>{{ $booking->service_name }}</td>
-                    <td>{{ $booking->booking_date }}<br><small>{{ $booking->booking_time }}</small></td>
-                    <td>
-                        <span class="badge badge-{{ $booking->status }}">{{ ucfirst($booking->status) }}</span>
-                    </td>
-                    <td>
-                        @if($booking->status !== 'confirmed')
-                            <form action="{{ route('admin.bookings.updateStatus', $booking) }}" method="POST" style="display:inline;">
-                                @csrf
-                                @method('PATCH')
-                                <input type="hidden" name="status" value="confirmed">
-                                <button type="submit" class="btn-confirm">Confirm</button>
-                            </form>
-                        @endif
-
-                        @if($booking->status !== 'cancelled')
-                            <form action="{{ route('admin.bookings.updateStatus', $booking) }}" method="POST" style="display:inline;">
-                                @csrf
-                                @method('PATCH')
-                                <input type="hidden" name="status" value="cancelled">
-                                <button type="submit" class="btn-cancel">Cancel</button>
-                            </form>
-                        @endif
-
-                        <form action="{{ route('admin.bookings.destroy', $booking) }}" method="POST" style="display:inline;" onsubmit="return confirm('Delete booking permanently?');">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn-delete">Delete</button>
-                        </form>
-                    </td>
-                </tr>
-            @empty
-                <tr><td colspan="7">No reservations found.</td></tr>
-            @endforelse
-        </tbody>
-    </table>
+        @empty
+            <tr>
+                <td colspan="8">No court bookings found.</td>
+            </tr>
+        @endforelse
+    </tbody>
+</table>
 </body>
 </html>

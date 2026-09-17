@@ -4,8 +4,64 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "53b5d56b3b7e3cbac1713e68c8850f6c",
+    "content-hash": "6443a059cd98f1e48c871feec2771891",
     "packages": [
+        {
+            "name": "bayarcash/php-sdk",
+            "version": "v3.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/bayarcash/php-sdk.git",
+                "reference": "fee736fa3a003ac10e034788898f6add7070d23e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/bayarcash/php-sdk/zipball/fee736fa3a003ac10e034788898f6add7070d23e",
+                "reference": "fee736fa3a003ac10e034788898f6add7070d23e",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "guzzlehttp/guzzle": "^7.0",
+                "php": "^7.4|^8.0"
+            },
+            "require-dev": {
+                "illuminate/support": "^7.0|^8.0|^9.0|^10.0|^11.0",
+                "phpunit/phpunit": "^9.5|^10.5"
+            },
+            "type": "sdk",
+            "extra": {
+                "laravel": {
+                    "alias": {
+                        "BayarcashSdk": "Bayarcash\\Facades\\Bayarcash"
+                    },
+                    "providers": [
+                        "Bayarcash\\BayarcashSdkServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Bayarcash\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "faiz",
+                    "email": "faizafzal@webmpian.com"
+                }
+            ],
+            "description": "Bayarcash payment gateway PHP Sdk.",
+            "support": {
+                "issues": "https://github.com/bayarcash/php-sdk/issues",
+                "source": "https://github.com/bayarcash/php-sdk/tree/v3.1.0"
+            },
+            "time": "2026-08-20T11:58:08+00:00"
+        },
         {
             "name": "brick/math",
             "version": "0.14.8",
